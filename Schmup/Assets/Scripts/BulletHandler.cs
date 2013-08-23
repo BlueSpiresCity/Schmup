@@ -5,6 +5,7 @@ public class BulletHandler : MonoBehaviour {
 	
 	public int BulletType;
 	public bool IsLive;
+	public bool IsHostile;
 	public float AttackCooldown;
 	public float Rotation;
 	public float MaxLifeTime;

@@ -5,7 +5,7 @@ using System.Collections;
 public class GameController : MonoBehaviour, IGUIMaster {
 	#region Fields and Properties
 	//Inspector Assignments
-	public BulletManager BulletControl;
+	public BulletManager BulletEngine;
 	public Camera MainCamera;
 	
 	[SerializeField]
@@ -38,8 +38,8 @@ public class GameController : MonoBehaviour, IGUIMaster {
 	void Awake(){
 		tag = "GameController";
 		ButtonsInternal = new Hashtable();
-		if(!BulletControl)
-			BulletControl = GetComponent<BulletManager>();
+		if(!BulletEngine)
+			BulletEngine = GetComponent<BulletManager>();
 		if(!MainCamera)
 			MainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		MainCamera.isOrthoGraphic = true;
