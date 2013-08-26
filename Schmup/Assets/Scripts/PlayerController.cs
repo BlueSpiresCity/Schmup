@@ -12,13 +12,17 @@ public class PlayerController : MonoBehaviour {
 		Focused = 1
 	}
 	public PlayerStates State;
+	public int MaxHealth;
 	public InventorySystem Inventory;
 	public BulletPort[] Ports;
 	public bool UseMouseInput;
 	public float Sensitivity;
 	public float AttackRateModifier;
 	
-
+	private float CollisionSizeSqrInternal;
+	public float CollisionSizeSqr{
+		get{return CollisionSizeSqrInternal;}
+	}
 
 	//Local
 	private float HorizontalAxis;
@@ -26,6 +30,7 @@ public class PlayerController : MonoBehaviour {
 	private float OriginalSensitivity;
 	private float OriginalAttackRateModifier;
 	private float EaseTimer;
+	private int CurrentHealth;
 	private Vector2 PlayerInput;
 	private bool CanAttack;
 	private bool ShowingCursor;
@@ -33,6 +38,7 @@ public class PlayerController : MonoBehaviour {
 	
 	//Controls what Inspector Values will reset to
 	void Reset(){
+		MaxHealth = 10;
 		UseMouseInput = false;
 		Sensitivity = 2f;
 		AttackRateModifier = 1f;
@@ -68,6 +74,11 @@ public class PlayerController : MonoBehaviour {
 		LastPosition = transform.position;
 		
 		CanAttack = true;
+		
+		CurrentHealth = MaxHealth;
+		
+		CollisionSizeSqrInternal = GetComponentInChildren<Renderer>().bounds.extents.x;
+		CollisionSizeSqrInternal *= CollisionSizeSqrInternal;
 	}
 	
 	void ShowCursor(bool State){
@@ -166,6 +177,14 @@ public class PlayerController : MonoBehaviour {
 	Vector3 CalculateCurrentVelocity(){
 		return (transform.position - LastPosition)/Time.deltaTime;
 	}
+	
+	public void DoDamage(int DamageInt){
+		CurrentHealth -= DamageInt;
+		if(CurrentHealth <= 0){
+			print("Dead");
+			CurrentHealth = MaxHealth;
+		}
+	}
 	#endregion
 }
 
@@ -173,44 +192,6 @@ public class PlayerController : MonoBehaviour {
 [System.Serializable]
 public class InventorySystem{
 	public GameObject Thing;
-}
-
-//Handles Spawn points for Bullets
-[System.Serializable]
-public class BulletPort{
-	public float Cooldown = 0.1f;
-	public Transform PortTransform;
-	public GameObject BulletPrefab;
-	public Transform[] Locations;
-	public GameObject[] BulletPrefabs;
-	
-	private bool CanFireInternal = true;
-	public bool CanFire{
-		get{return CanFireInternal;}
-		set{CanFireInternal = value;}
-	}
-	
-	public IEnumerator StartCooldown(float Modifier = 1f){
-		CanFireInternal = false;
-		yield return new WaitForSeconds(Cooldown / Modifier);
-		CanFireInternal = true;
-	}
-	
-	public void SetLocation(int LocationsInt, float LerpValue){
-		LocationsInt = Mathf.Clamp(LocationsInt, 0, Locations.Length);
-		
-		if(LerpValue == 0){
-			PortTransform.position = Locations[0].position;
-			PortTransform.rotation = Locations[0].rotation;
-		}
-		
-		PortTransform.position = Vector3.Lerp(Locations[0].position, Locations[LocationsInt].position, LerpValue);
-		PortTransform.rotation = Quaternion.Lerp(Locations[0].rotation, Locations[LocationsInt].rotation, LerpValue);
-	}
-	
-	public void SetBulletPrefab(int BulletInt){
-		BulletPrefab = BulletPrefabs[BulletInt];
-	}
 }
 
 

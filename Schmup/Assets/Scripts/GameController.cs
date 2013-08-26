@@ -1,16 +1,22 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(BulletManager))]
 public class GameController : MonoBehaviour, IGUIMaster {
 	#region Fields and Properties
 	//Inspector Assignments
 	public BulletManager BulletEngine;
+	public PlayerController Player;
 	public Camera MainCamera;
+	
+	//Table of Enemies
+	public List<EnemyHandler> Enemies;
 	
 	[SerializeField]
 	private float BoundsOffset;
 	
+	//Screen Bounds
 	private Vector2 ScreenBoundsInternal;
 	public Vector2 ScreenBounds{
 		get{return ScreenBoundsInternal;}
@@ -38,8 +44,11 @@ public class GameController : MonoBehaviour, IGUIMaster {
 	void Awake(){
 		tag = "GameController";
 		ButtonsInternal = new Hashtable();
+		Enemies = new List<EnemyHandler>();
 		if(!BulletEngine)
 			BulletEngine = GetComponent<BulletManager>();
+		if(!Player)
+			Player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerController>();
 		if(!MainCamera)
 			MainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
 		MainCamera.isOrthoGraphic = true;

@@ -27,6 +27,11 @@ public class BulletManager : MonoBehaviour {
 		SweepDestructedBullets();
 	}
 	
+	void FixedUpdate(){
+		CheckCollisions();
+	}
+	
+	#region Update Bullets
 	void UpdateBullets(){
 		if(BulletsInternal.Count > 0){
 			foreach(BulletHandler Bullet in BulletsInternal){
@@ -53,6 +58,28 @@ public class BulletManager : MonoBehaviour {
 		}
 	}
 	
+	void CheckCollisions(){
+		float Distance;
+		foreach(BulletHandler Bullet in Bullets){
+			if(Bullet.IsHostile){
+				Distance = (Bullet.transform.position - Master.Player.transform.position).sqrMagnitude - Bullet.CollisionSizeSqr;
+				if(Distance < Master.Player.CollisionSizeSqr){
+					Bullet.IsQueuedForDestruct = true;
+					Master.Player.DoDamage(Bullet.Damage);
+				}
+			}
+			else{
+				foreach(EnemyHandler Enemy in Master.Enemies){
+					Distance = (Bullet.transform.position - Enemy.transform.position).sqrMagnitude - Bullet.CollisionSizeSqr;
+					if(Distance < Enemy.CollisionSizeSqr){
+						Bullet.IsQueuedForDestruct = true;
+						Enemy.DoDamage(Bullet.Damage);
+					}
+				}
+			}
+		}
+	}
+	
 	void SweepDestructedBullets(){
 		//Copied to prevent issues when removing elements from List
 		BulletHandler[] CopyOfBulletsAsArray = new BulletHandler[BulletsInternal.Count];
@@ -69,4 +96,5 @@ public class BulletManager : MonoBehaviour {
 		BulletsInternal.Remove(Bullet);
 		Destroy(Bullet.gameObject);
 	}
+	#endregion
 }
