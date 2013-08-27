@@ -5,7 +5,8 @@ public class BulletHandler : MonoBehaviour {
 	
 	public enum BulletType{
 		Normal = 0,
-		SpiralIn = 1
+		SpiralIn = 1,
+		SpiralOut = 2
 	}
 	public BulletType Type;
 	public int Damage;
@@ -67,6 +68,9 @@ public class BulletHandler : MonoBehaviour {
 			break;
 		case BulletType.SpiralIn:
 			StartCoroutine(SpiralIn());
+			break;
+		default:
+			print("Please write special behavior code for " + BehaviorType.ToString() + ".");
 			break;
 		}
 	}

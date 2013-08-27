@@ -6,9 +6,9 @@ using System.Collections;
 public class BulletPort{
 	public float Cooldown = 0.1f;
 	public Transform PortTransform;
-	public GameObject BulletPrefab;
-	public Transform[] Locations;
+	public GameObject CurrentBulletPrefab;
 	public GameObject[] BulletPrefabs;
+	public Transform[] Locations;
 	
 	private bool CanFireInternal = true;
 	public bool CanFire{
@@ -35,6 +35,25 @@ public class BulletPort{
 	}
 	
 	public void SetBulletPrefab(int BulletInt){
-		BulletPrefab = BulletPrefabs[BulletInt];
+		CurrentBulletPrefab = BulletPrefabs[BulletInt];
+	}
+	
+	public IEnumerator Shoot(BulletManager BulletEngine, float RateModifier = 1f){
+		if(!CurrentBulletPrefab) yield break;
+		CanFireInternal = false;
+		GameObject BulletObject = MonoBehaviour.Instantiate(
+					CurrentBulletPrefab,
+					PortTransform.position, 
+					Quaternion.LookRotation(PortTransform.forward)
+				) 
+				as GameObject;
+		BulletHandler Bullet = BulletObject.GetComponent<BulletHandler>();
+		//Make it Live, so it will have the correct flag to Move
+		Bullet.IsLive = true;
+		//Add to Bullet Manager, which will move it
+		BulletEngine.Bullets.Add(Bullet);
+		//Begin the Port's cooldown procedure
+		yield return new WaitForSeconds(Cooldown / RateModifier);
+		CanFireInternal = true;
 	}
 }

@@ -35,6 +35,11 @@ public class GameController : MonoBehaviour, IGUIMaster {
 	public Hashtable Buttons{
 		get{return ButtonsInternal;}
 	}
+	
+	private float LevelTimeInternal;
+	public float LevelTime{
+		get{return LevelTimeInternal;}
+	}
 	#endregion
 	
 	void Reset(){
@@ -56,6 +61,10 @@ public class GameController : MonoBehaviour, IGUIMaster {
 	
 	void Start(){
 		GetScreenBounds();
+	}
+	
+	void FixedUpdate(){
+		LevelTimeInternal += Time.fixedDeltaTime;
 	}
 	
 	public void ButtonClick(string ButtonName){

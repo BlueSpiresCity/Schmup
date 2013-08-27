@@ -27,6 +27,20 @@ public static class MovementCoroutines{
 		TheObject.transform.position = MoveTo;
 	}
 	
+	public static IEnumerator MoveLerpWithRotaTo(GameObject TheObject, Vector3 MoveTo, Quaternion RotateTo, float MoveTime){
+		Vector3 MoveFrom = TheObject.transform.position;
+		Quaternion RotateFrom = TheObject.transform.rotation;
+		float CurrentTime = 0;
+		while(CurrentTime < 1f){
+			TheObject.transform.position = Vector3.Lerp(MoveFrom, MoveTo, CurrentTime);
+			TheObject.transform.rotation = Quaternion.Lerp(RotateFrom, RotateTo, CurrentTime);
+			CurrentTime += Time.deltaTime/MoveTime;
+			yield return new WaitForEndOfFrame();
+		}
+		TheObject.transform.position = MoveTo;
+		TheObject.transform.rotation = RotateTo;
+	}
+	
 	/// <summary>
 	/// Moves an object from its original position to the MoveTo position at Speed. e.g. Moves TheRock to Vector Position (1,2,3) at 5 units/second
 	/// </summary>

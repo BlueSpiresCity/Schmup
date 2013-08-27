@@ -81,12 +81,6 @@ public class PlayerController : MonoBehaviour {
 		CollisionSizeSqrInternal *= CollisionSizeSqrInternal;
 	}
 	
-	void ShowCursor(bool State){
-		ShowingCursor = State;
-		Screen.showCursor = State;
-		Screen.lockCursor = !State;
-	}
-	
 	//Helper to keep all input stuff in one place
 	void ProcessInput(){
 		//Get Player Input on Direction
@@ -96,7 +90,25 @@ public class PlayerController : MonoBehaviour {
 		}
 		
 		//Focus
-		if(Input.GetButton("Focus")){
+		Focus(Input.GetButton("Focus"));
+		
+		//Move Player
+		if(PlayerInput != Vector2.zero && !Screen.showCursor){
+			Move();
+		}
+		
+		//Attack
+		if(Input.GetButton("Fire1") && CanAttack){
+			Attack();
+		}
+		
+		//Unhide the Cursor
+		if(Input.GetKeyDown("escape")) 
+			ShowCursor(!ShowingCursor);
+	}
+	
+	void Focus(bool State){
+		if(State){
 			Sensitivity = OriginalSensitivity/4f;
 			AttackRateModifier = OriginalAttackRateModifier * 1.1f;
 			if(EaseTimer < 1f){
@@ -117,23 +129,6 @@ public class PlayerController : MonoBehaviour {
 		foreach(BulletPort Port in Ports){
 			Port.SetLocation(1, EaseTimer);
 		}
-		
-		//Move Player
-		if(PlayerInput != Vector2.zero && !Screen.showCursor){
-			Move();
-		}
-		
-		//Attack
-		if(Input.GetButton("Fire1") && CanAttack){
-			foreach(BulletPort Port in Ports){
-				if(Port.CanFire)
-					Shoot(Port);
-			}
-		}
-		
-		//Unhide the Cursor
-		if(Input.GetKeyDown("escape")) 
-			ShowCursor(!ShowingCursor);
 	}
 	
 	void Move(){
@@ -158,32 +153,30 @@ public class PlayerController : MonoBehaviour {
 		transform.position = new Vector3(HorizontalAxis, 0, VerticalAxis);
 	}
 
-	void Shoot(BulletPort Port){
-		GameObject BulletObject = Instantiate(
-				Port.BulletPrefab,
-				Port.PortTransform.position, 
-				Quaternion.LookRotation(Port.PortTransform.forward)
-			) 
-			as GameObject;
-		BulletHandler Bullet = BulletObject.GetComponent<BulletHandler>();
-		//Make it Live, so it will have the correct flag to Move
-		Bullet.IsLive = true;
-		//Add to Bullet Manager, which will move it
-		Master.BulletEngine.Bullets.Add(Bullet);
-		//Begin the Port's cooldown procedure
-		StartCoroutine(Port.StartCooldown(AttackRateModifier));
-	}
-	
-	Vector3 CalculateCurrentVelocity(){
-		return (transform.position - LastPosition)/Time.deltaTime;
+	void Attack(){
+		foreach(BulletPort Port in Ports){
+			if(Port.CanFire)
+				StartCoroutine(Port.Shoot(Master.BulletEngine, AttackRateModifier));
+		}
 	}
 	
 	public void DoDamage(int DamageInt){
 		CurrentHealth -= DamageInt;
 		if(CurrentHealth <= 0){
+			//TEMP
 			print("Dead");
 			CurrentHealth = MaxHealth;
 		}
+	}
+	
+	void ShowCursor(bool State){
+		ShowingCursor = State;
+		Screen.showCursor = State;
+		Screen.lockCursor = !State;
+	}
+	
+	Vector3 CalculateCurrentVelocity(){
+		return (transform.position - LastPosition)/Time.deltaTime;
 	}
 	#endregion
 }
